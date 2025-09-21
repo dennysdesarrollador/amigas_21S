@@ -49,13 +49,10 @@
   margin-top:1rem; 
   text-shadow:0 0 10px #ffd700;
 }
-</style>
 
-<!-- ======================= -->
-<!-- CSS SORPRESA + REGALO UNIFICADO -->
-<!-- ======================= -->
-<style>
-/* Fondo negro y estrellas */
+/* ======================= */
+/* CSS SORPRESA + REGALO UNIFICADO */
+/* ======================= */
 #sorpresa, #regalo {
   display:none;
   width:100%;
@@ -78,7 +75,7 @@ canvas#starsCanvas, canvas#bg {
   display:block;
 }
 
-#sorpresa .content {
+#sorpresa .content, #regalo .message {
   position:relative;
   z-index:1;
   display:flex;
@@ -129,17 +126,6 @@ canvas#starsCanvas, canvas#bg {
 
 /* REGALO */
 body.regalo{overflow-y:auto;}
-.message{
-  position:relative;
-  z-index:1;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  text-align:center;
-  padding:40px 20px;
-  color:#fff;
-}
-
 .message h1{
   font-size:2.8rem;
   color:#ffd700;
@@ -273,12 +259,33 @@ function initSunflowers(){
 // Estrellas 2D
 const canvas2d = document.getElementById("starsCanvas");
 const ctx2d = canvas2d.getContext("2d");
-function resizeCanvas2D(){ canvas2d.width = window.innerWidth; canvas2d.height = window.innerHeight; }
-window.addEventListener("resize", resizeCanvas2D);
-resizeCanvas2D();
-const stars2d = Array.from({length:150}, () => ({x:Math.random()*canvas2d.width, y:Math.random()*canvas2d.height, radius:Math.random()*2, speed:0.5 + Math.random()*1.5}));
-function animateStars2D(){ctx2d.clearRect(0,0,canvas2d.width,canvas2d.height);ctx2d.fillStyle="white";stars2d.forEach(s=>{ctx2d.beginPath();ctx2d.arc(s.x,s.y,s.radius,0,Math.PI*2);ctx2d.fill();s.y+=s.speed;if(s.y>canvas2d.height){s.y=0;s.x=Math.random()*canvas2d.width;}});requestAnimationFrame(animateStars2D);}
-animateStars2D();
+const canvasBg = document.getElementById("bg");
+const ctxBg = canvasBg.getContext("2d");
+
+function resizeCanvas(){ 
+  canvas2d.width = canvasBg.width = window.innerWidth; 
+  canvas2d.height = canvasBg.height = window.innerHeight; 
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+const stars = Array.from({length:150}, () => ({x:Math.random()*canvas2d.width, y:Math.random()*canvas2d.height, radius:Math.random()*2, speed:0.5 + Math.random()*1.5}));
+
+function animateStars(){
+  [ {canvas:canvas2d, ctx:ctx2d}, {canvas:canvasBg, ctx:ctxBg} ].forEach(cobj=>{
+    cobj.ctx.clearRect(0,0,cobj.canvas.width,cobj.canvas.height);
+    stars.forEach(s=>{
+      cobj.ctx.beginPath();
+      cobj.ctx.arc(s.x,s.y,s.radius,0,Math.PI*2);
+      cobj.ctx.fillStyle="white";
+      cobj.ctx.fill();
+      s.y+=s.speed;
+      if(s.y>cobj.canvas.height){s.y=0;s.x=Math.random()*cobj.canvas.width;}
+    });
+  });
+  requestAnimationFrame(animateStars);
+}
+animateStars();
 
 // Audio click
 document.addEventListener("click", function enableAudio(){
